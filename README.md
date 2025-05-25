@@ -1,173 +1,134 @@
 
-# 🔒 Flask Rate-Limited API for Ethical Testing
+# 🔒 Rate Limiting Educational Project (Java + Python)
 
-This is a simple Flask API designed for **ethical testing** of rate-limiting mechanisms.
+This repository contains a full-stack **ethical API security testing project** with:
 
-It includes:
-- ✅ A `/test` endpoint supporting both GET and POST
-- ✅ A built-in rate limit of **50 requests per minute per IP**
-- ✅ Ideal for testing your own clients, rate-limiting logic, or learning API security
+- ✅ A **Java GUI application** to test rate limits
+- ✅ A **Flask-based Python server** with rate-limited endpoints
+- ✅ Support for both GET and POST
+- ✅ Logging, stats, response times, and more
+- ✅ Bonus: Basic CRUD and multithreading examples in Java
 
-> ⚠️ **This project is strictly for educational and ethical use.**
->
-> Do not use this to test external APIs or services you don’t own or have written permission to test. The author is not responsible for misuse.
-
----
-
-## 🚀 Features
-
-- 🧩 Built using Flask and Flask-Limiter
-- ⏱️ Automatic 429 responses if the rate limit is exceeded
-- 🔄 Accepts both GET and JSON-based POST requests
-- 💡 Useful for simulating load and understanding rate-limiting behavior
+> ⚠️ **Ethical Use Only:** This tool is created solely for educational purposes to demonstrate how rate limiting works. Do not use this to target any system without full authorization.
 
 ---
 
-## 🛠️ Setup Instructions
+## 📦 Project Structure
 
-### 1. Clone this repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/rate-limit-api.git
-cd rate-limit-api
+```
+📁 rate-limit-project/
+├── 📁 java-client/           # Java GUI app with threading
+│   └── RateTester.java
+├── 📁 python-server/         # Flask API with rate limit
+│   └── app.py
+└── README.md                 # This file
 ```
 
-### 2. Install dependencies
+---
+
+## 🧠 What You Learn
+
+- 🔄 API request automation in Java
+- 🧵 Multithreading and concurrency
+- 🧪 How to test server rate limits
+- 🎨 Simple Java Swing GUI
+- 🔐 Flask server security features
+- 📊 Approximate rate limit detection
+
+---
+
+## 🖥️ Java GUI Tester
+
+### ✅ Features
+
+- Choose request type: GET or POST
+- Enter custom endpoint and JSON payload
+- Launch multithreaded requests
+- Detect server rate limit (req/min)
+- Stop on rate-limit detection
+- Output logs and response times
+
+### 🚀 Run Java Client
+
+Compile and run:
+
+```bash
+javac RateTester.java
+java RateTester
+```
+
+Or use your IDE like IntelliJ or Eclipse.
+
+---
+
+## 🧪 Python Flask Server
+
+### ✅ Features
+
+- `/test` endpoint with GET and POST
+- Built-in **50 requests/minute rate limit**
+- Automatic 429 error handling
+- JSON body handling in POST
+
+### 📦 Install Dependencies
 
 ```bash
 pip install flask flask-limiter
 ```
 
-### 3. Run the Flask server
+### ▶️ Run the Server
 
 ```bash
 python app.py
 ```
 
-Server will start at:
-```
-http://127.0.0.1:5000/test
-```
+Server starts on: `http://127.0.0.1:5000/test`
 
 ---
 
-## 🔗 API Endpoints
+## 🧪 API Usage
 
-### 🔹 GET `/test`
+### 🔹 GET Example
 
 ```bash
 curl http://127.0.0.1:5000/test
 ```
 
-**Response:**
-```json
-{
-  "message": "GET request received"
-}
-```
-
----
-
-### 🔹 POST `/test`
-
-Send a JSON payload:
+### 🔹 POST Example
 
 ```bash
-curl -X POST http://127.0.0.1:5000/test   -H "Content-Type: application/json"   -d '{"username": "testuser", "password": "1234"}'
-```
-
-**Response:**
-```json
-{
-  "message": "POST request received",
-  "your_data": {
-    "username": "testuser",
-    "password": "1234"
-  }
-}
+curl -X POST http://127.0.0.1:5000/test -H "Content-Type: application/json" -d '{"username": "test", "password": "123"}'
 ```
 
 ---
 
-## ⛔ Rate Limiting
+## 💡 Advanced Features (Java)
 
-- The API uses **Flask-Limiter** to enforce a **limit of 50 requests per minute** per IP.
-- If the limit is exceeded, the server responds with:
+- Multithreaded stress test using `Executors`
+- Auto-measure actual rate limit per minute
+- Stops all threads after first 429 error
+- JSON editor only appears if POST is selected
+- Swing-based GUI with input validation
 
-**HTTP 429 Too Many Requests**
-```json
-{
-  "message": "Rate limit exceeded: 50 per 1 minute"
-}
+---
+
+## 📊 Example Output (Java App)
+
 ```
-
----
-
-## 🧪 How to Test the Rate Limit
-
-You can use:
-- `curl` in a `for` loop
-- Postman (with a runner)
-- A Python/Java multithreaded script (only against **your own server**)
-- Load testing tools like `locust`, `hey`, or `ab`
-
-✅ Make sure you’re only testing on **localhost** or servers you are authorized to test.
-
----
-
-## 👨‍💻 Example Python Client (Optional)
-
-```python
-import requests
-
-url = "http://127.0.0.1:5000/test"
-for i in range(60):
-    response = requests.get(url)
-    print(i+1, response.status_code, response.text)
-```
-
----
-
-## 📂 Example `app.py` Server Code
-
-```python
-from flask import Flask, request, jsonify
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-
-app = Flask(__name__)
-
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=["50 per minute"]
-)
-limiter.init_app(app)
-
-@app.route('/test', methods=['GET', 'POST'])
-@limiter.limit("50 per minute")
-def test_endpoint():
-    if request.method == 'POST':
-        data = request.get_json() or {}
-        return jsonify({
-            "message": "POST request received",
-            "your_data": data
-        })
-    return jsonify({
-        "message": "GET request received"
-    })
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+Starting 100 requests with 10 threads
+Request 37 failed with status 429 (Rate Limit)
+Stopped after hitting rate limit.
+Approx. Rate Limit: 48.5 req/min
 ```
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — feel free to use and modify it for ethical and educational purposes.
+This project is open-source under the **MIT License**.
 
 ---
 
 ## 🙏 Credits
 
-Built as part of a web security university project to demonstrate API rate limiting and ethical testing practices.
+Built for a university project on **web security and API testing**. This repository is intended for **educational and ethical testing only**.
